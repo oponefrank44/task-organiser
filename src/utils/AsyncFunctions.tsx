@@ -11,13 +11,16 @@ import {
 import type { Note } from "../interface/note";
 import { getVisitorId } from "./helper";
 
-const BASE_URL = "http://localhost:8000/note";
+const BASE_URL = "https://task-backend-gsvc.onrender.com/note";
 
 // Custom hook for all note operations with Redux integration
 export const useNotes = () => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const visitorIdPromise = getVisitorId(); // Get visitor ID once and reuse
+
+
+
 
   // Fetch all notes and update Redux
   const useFetchAllNotes = () => {
@@ -26,15 +29,19 @@ export const useNotes = () => {
       queryFn: async () => {
         dispatch(setLoading(true));
         try {
-          const response = await fetch(BASE_URL, {
+          const response = await fetch(`${BASE_URL}`, {
             headers: {
               "visitor-id": await visitorIdPromise, // Include visitor ID in headers
             },
           });
+          console.log(response);
+          
           if (!response.ok) {
             throw new Error("Failed to fetch notes");
           }
           const data = await response.json();
+
+          console.log(data);
 
           // Update Redux state with fetched notes
           dispatch(setNotes(data));
@@ -185,7 +192,7 @@ export const useNotes = () => {
       onSuccess: (id) => {
         dispatch(setPreviewNote(null));
         console.log(id);
-        
+
         queryClient.invalidateQueries({ queryKey: ["notes"] });
       },
 

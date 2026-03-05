@@ -1,27 +1,33 @@
 import { useEffect, useState } from "react";
 import { getVisitorId } from "../utils/helper";
 
+
+
 export const TaskByPriority: React.FC = () => {
   const [priorityNote, setPriorityNote] = useState({
     high: 0,
     medium: 0,
     low: 0
   });
-  const visitorIdPromise = getVisitorId(); // Get visitor ID once and reuse
+  const visitorIdPromise = getVisitorId();
+  console.log(visitorIdPromise);
+  // Get visitor ID once and reuse
 
   useEffect(() => {
     const fetchNotes = async () => {
+
+const BASE_URL = "https://task-backend-gsvc.onrender.com/note";
       try {
         const [highRes, mediumRes, lowRes] = await Promise.all([
-          fetch("http://localhost:8000/note/priority?priority=high", { method: "POST" , headers: {
+          fetch(`${BASE_URL}/priority?priority=high`, { method: "POST" , headers: {
             "Content-Type": "application/json",
             "visitor-id": await visitorIdPromise
           },}).then(res => res.json()),
-          fetch("http://localhost:8000/note/priority?priority=medium", { method: "POST" , headers: {
+          fetch(`${BASE_URL}/priority?priority=medium`, { method: "POST" , headers: {
             "Content-Type": "application/json",
             "visitor-id": await visitorIdPromise
           },}).then(res => res.json()),
-          fetch("http://localhost:8000/note/priority?priority=low", { method: "POST" , headers: {
+          fetch(`${BASE_URL}/priority?priority=low`, { method: "POST" , headers: {
             "Content-Type": "application/json",
             "visitor-id": await visitorIdPromise
           },}).then(res => res.json())
@@ -38,7 +44,7 @@ export const TaskByPriority: React.FC = () => {
     };
 
     fetchNotes();
-  }, []);
+  }, [visitorIdPromise]);
 
   return (
     <div className="p-4 border-b border-gray-200 bg-white">
