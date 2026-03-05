@@ -6,9 +6,10 @@ import {
   setPreviewNote,
   setsearchNote,
   setLoading,
-  setError
+  setError,
 } from "../note/noteSlice";
 import type { Note } from "../interface/note";
+import { getVisitorId } from "./helper";
 
 const BASE_URL = "http://localhost:8000/note";
 
@@ -16,6 +17,7 @@ const BASE_URL = "http://localhost:8000/note";
 export const useNotes = () => {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
+  const visitorIdPromise = getVisitorId(); // Get visitor ID once and reuse
 
   // Fetch all notes and update Redux
   const useFetchAllNotes = () => {
@@ -24,7 +26,11 @@ export const useNotes = () => {
       queryFn: async () => {
         dispatch(setLoading(true));
         try {
-          const response = await fetch(BASE_URL);
+          const response = await fetch(BASE_URL, {
+            headers: {
+              "visitor-id": await visitorIdPromise, // Include visitor ID in headers
+            },
+          });
           if (!response.ok) {
             throw new Error("Failed to fetch notes");
           }
@@ -34,7 +40,7 @@ export const useNotes = () => {
           dispatch(setNotes(data));
 
           return data;
-        } catch (error:any) {
+        } catch (error: any) {
           dispatch(setError(error.message));
           throw error;
         }
@@ -51,7 +57,12 @@ export const useNotes = () => {
       queryFn: async () => {
         dispatch(setLoading(true));
         try {
-          const response = await fetch(`${BASE_URL}/${id}`);
+          const response = await fetch(`${BASE_URL}/${id}`, {
+            headers: {
+              "Content-Type": "application/json",
+              "visitor-id": await visitorIdPromise,
+            },
+          });
           if (!response.ok) {
             throw new Error("Failed to fetch note");
           }
@@ -61,7 +72,7 @@ export const useNotes = () => {
           dispatch(setPreviewNote(data));
 
           return data;
-        } catch (error:any) {
+        } catch (error: any) {
           dispatch(setError(error.message));
           throw error;
         }
@@ -77,7 +88,10 @@ export const useNotes = () => {
         dispatch(setLoading(true));
         const response = await fetch(`${BASE_URL}/create-note`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "visitor-id": await visitorIdPromise,
+          },
           body: JSON.stringify(newNote),
         });
         if (!response.ok) {
@@ -104,11 +118,20 @@ export const useNotes = () => {
   // Update note mutation
   const useUpdateNote = () => {
     return useMutation({
-      mutationFn: async ({ id, updatedData }: { id: string; updatedData: Partial<Note> }) => {
+      mutationFn: async ({
+        id,
+        updatedData,
+      }: {
+        id: string;
+        updatedData: Partial<Note>;
+      }) => {
         dispatch(setLoading(true));
         const response = await fetch(`${BASE_URL}/update-note/${id}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "visitor-id": await visitorIdPromise,
+          },
           body: JSON.stringify(updatedData),
         });
         if (!response.ok) {
@@ -132,135 +155,134 @@ export const useNotes = () => {
       },
     });
   };
-// Delete note mutation
-const useDeleteNote = () => {
-  const queryClient = useQueryClient();
-  const dispatch = useDispatch();
+  // Delete note mutation
+  const useDeleteNote = () => {
+    const queryClient = useQueryClient();
+    const dispatch = useDispatch();
 
-  return useMutation({
-    mutationFn: async (id: string) => {
-      // It's often better to let the mutation state handle 'loading'
-      // rather than manually dispatching setLoading(true),
-      // but if your UI depends on global loading, this is fine.
-      dispatch(setLoading(true));
+    return useMutation({
+      mutationFn: async (id: string) => {
+        // It's often better to let the mutation state handle 'loading'
+        // rather than manually dispatching setLoading(true),
+        // but if your UI depends on global loading, this is fine.
+        dispatch(setLoading(true));
 
-      const response = await fetch(`${BASE_URL}/${id}`, {
-        method: "DELETE",
-      });
+        const response = await fetch(`${BASE_URL}/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "visitor-id": await visitorIdPromise,
+          },
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to delete note");
-      }
-      return id;
-    },
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || "Failed to delete note");
+        }
+        return id;
+      },
 
-    onSuccess: (deletedId) => {
-      // 1. Update Redux: Clear preview if it's the one we just deleted
-      dispatch(setPreviewNote(null));
+      onSuccess: (id) => {
+        dispatch(setPreviewNote(null));
+        console.log(id);
+        
+        queryClient.invalidateQueries({ queryKey: ["notes"] });
+      },
 
-      // 2. Sync Cache: Tell TanStack Query the 'notes' list is now old
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      onError: (error: Error) => {
+        dispatch(setError(error.message));
+      },
 
-      // Optional: Manual cache update for immediate UI response
-      // queryClient.setQueryData(["notes"], (old: any) =>
-      //   old?.filter((note: any) => note._id !== deletedId)
-      // );
-    },
+      onSettled: () => {
+        dispatch(setLoading(false));
+      },
+    });
+  };
+  const useSearchNotes = () => {
+    return useMutation({
+      mutationFn: async (filters: { priority?: string; progress?: string }) => {
+        dispatch(setLoading(true));
 
-    onError: (error: Error) => {
-      dispatch(setError(error.message));
-    },
+        // Build query parameters properly
+        const params = new URLSearchParams();
+        if (filters.priority) params.append("priority", filters.priority);
+        if (filters.progress) params.append("progress", filters.progress);
 
-    onSettled: () => {
-      dispatch(setLoading(false));
-    },
-  });
-};
-const useSearchNotes = () => {
-  return useMutation({
-    mutationFn: async (filters: { priority?: string; progress?: string }) => {
-      dispatch(setLoading(true));
+        const url = `${BASE_URL}/priority?${params.toString()}`;
 
-      // Build query parameters properly
-      const params = new URLSearchParams();
-      if (filters.priority) params.append('priority', filters.priority);
-      if (filters.progress) params.append('progress', filters.progress);
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "visitor-id": await visitorIdPromise,
+          },
+        });
 
-      const url = `${BASE_URL}/priority?${params.toString()}`;
+        // Read the response body once
+        const data = await response.json();
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+        if (!response.ok) {
+          // If the response is not ok, throw the error message from the server
+          throw new Error(data.message || "Failed to search tasks");
+        }
 
-      // Read the response body once
-      const data = await response.json();
+        // Success: log and return the data
+        console.log(data);
+        return data;
+      },
+      onSuccess: (data) => {
+        dispatch(setsearchNote(data));
+      },
+      onError: (error) => {
+        dispatch(setError(error.message));
+      },
+      onSettled: () => {
+        dispatch(setLoading(false));
+      },
+    });
+  };
+  const useSearchNotesByContent = () => {
+    const dispatch = useDispatch();
+    // Ensure your URL is correct (e.g., http://localhost:8000/note/search)
+    const url = "http://localhost:8000/note/search";
 
+    return useMutation({
+      mutationFn: async (searchText: string) => {
+        dispatch(setLoading(true));
 
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "visitor-id": await visitorIdPromise,
+          },
 
-      if (!response.ok) {
-        // If the response is not ok, throw the error message from the server
-        throw new Error(data.message || "Failed to search tasks");
-      }
+          body: JSON.stringify({
+            title: searchText,
+            description: searchText,
+          }),
+        });
 
-      // Success: log and return the data
-      console.log(data);
-      return data;
-    },
-    onSuccess: (data) => {
-      dispatch(setsearchNote(data));
-    },
-    onError: (error) => {
-      dispatch(setError(error.message));
-    },
-    onSettled: () => {
-      dispatch(setLoading(false));
-    },
-  });
-}
-const useSearchNotesByContent = () => {
-  const dispatch = useDispatch();
-  // Ensure your URL is correct (e.g., http://localhost:8000/note/search)
-  const url = "http://localhost:8000/note/search";
+        const data = await response.json();
 
-  return useMutation({
-    mutationFn: async (searchText: string) => {
-      dispatch(setLoading(true));
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to search tasks");
+        }
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        // We pass the searchText to both title and description
-        // so the backend finds the words in either field
-        body: JSON.stringify({
-          title: searchText,
-          description: searchText
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to search tasks");
-      }
-
-      return data;
-    },
-    onSuccess: (data) => {
-      // 'data' should be the array of notes from your backend
-      dispatch(setsearchNote(data));
-    },
-    onError: (error: any) => {
-      dispatch(setError(error.message));
-    },
-    onSettled: () => {
-      dispatch(setLoading(false));
-    },
-  });
-};
+        return data;
+      },
+      onSuccess: (data) => {
+        // 'data' should be the array of notes from your backend
+        dispatch(setsearchNote(data));
+      },
+      onError: (error: any) => {
+        dispatch(setError(error.message));
+      },
+      onSettled: () => {
+        dispatch(setLoading(false));
+      },
+    });
+  };
 
   return {
     useFetchAllNotes,
@@ -269,6 +291,6 @@ const useSearchNotesByContent = () => {
     useUpdateNote,
     useDeleteNote,
     useSearchNotes,
-    useSearchNotesByContent
+    useSearchNotesByContent,
   };
 };

@@ -21,8 +21,12 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, variant }) => {
   };
 
   return (
-    <div className={`${styles[variant]} p-3 rounded-xl transition-all hover:shadow-md active:scale-95 flex flex-col items-center justify-center text-center`}>
-      <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
+    <div
+      className={`${styles[variant]} p-3 rounded-xl transition-all hover:shadow-md active:scale-95 flex flex-col items-center justify-center text-center`}
+    >
+      <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider mb-1">
+        {label}
+      </p>
       <p className="text-xl sm:text-2xl font-bold">{value}</p>
     </div>
   );
@@ -44,7 +48,11 @@ export const TaskPreview: React.FC = () => {
   ) => (
     <div className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
       <span className="text-gray-500 text-xs sm:text-sm">{label}:</span>
-      <span className={`${colorClass} text-xs sm:text-sm font-semibold truncate ml-4`}>{value || "N/A"}</span>
+      <span
+        className={`${colorClass} text-xs sm:text-sm font-semibold truncate ml-4`}
+      >
+        {value || "N/A"}
+      </span>
     </div>
   );
 
@@ -82,7 +90,9 @@ export const TaskPreview: React.FC = () => {
           Task Details
         </h2>
         {previewNote && (
-           <span className="lg:hidden text-[10px] bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-bold">Preview Active</span>
+          <span className="lg:hidden text-[10px] bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-bold">
+            Preview Active
+          </span>
         )}
       </header>
 
@@ -91,20 +101,68 @@ export const TaskPreview: React.FC = () => {
           <h4 className="text-lg font-bold text-gray-900 mb-3 break-words">
             {previewNote.title}
           </h4>
-          <p className="text-gray-600 text-sm leading-relaxed mb-6 bg-gray-50 p-3 rounded-lg border border-gray-100">
-            {previewNote.description || "No description provided."}
-          </p>
+          <div className="text-gray-600 text-sm leading-relaxed mb-6 bg-gray-50 p-4 rounded-xl border border-gray-100 shadow-inner">
+            {previewNote.description ? (
+              previewNote.description.split("\n").map((line, index) => {
+                const trimmedLine = line.trim();
+
+                // Handle Headers (#)
+                if (trimmedLine.startsWith("#")) {
+                  return (
+                    <h4
+                      key={index}
+                      className="text-gray-900 font-bold text-base mt-3 mb-1 first:mt-0"
+                    >
+                      {trimmedLine.replace(/^#\s?/, "")}
+                    </h4>
+                  );
+                }
+
+                // Handle Bullet Points (-)
+                if (trimmedLine.startsWith("-")) {
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-start gap-2 ml-1 my-1"
+                    >
+                      <span className="text-blue-500 font-bold">•</span>
+                      <span>{trimmedLine.replace(/^- \s?/, "")}</span>
+                    </div>
+                  );
+                }
+
+                // Handle regular text and empty lines
+                return trimmedLine === "" ? (
+                  <div key={index} className="h-2" />
+                ) : (
+                  <p key={index} className="mb-1 last:mb-0">
+                    {line}
+                  </p>
+                );
+              })
+            ) : (
+              <p className="text-gray-400 italic">No description provided.</p>
+            )}
+          </div>
 
           <div className="space-y-1">
             {renderDetailRow(
               "Status",
               previewNote.progress,
-              previewNote.progress === "completed" ? "text-emerald-600" : previewNote.progress === "in-progress" ? "text-blue-600" : "text-gray-600"
+              previewNote.progress === "completed"
+                ? "text-emerald-600"
+                : previewNote.progress === "in-progress"
+                  ? "text-blue-600"
+                  : "text-gray-600",
             )}
             {renderDetailRow(
               "Priority",
               previewNote.priority,
-              previewNote.priority === "high" ? "text-red-600" : previewNote.priority === "medium" ? "text-amber-600" : "text-green-600"
+              previewNote.priority === "high"
+                ? "text-red-600"
+                : previewNote.priority === "medium"
+                  ? "text-amber-600"
+                  : "text-green-600",
             )}
             {renderDetailRow("Due Date", previewNote.dueDate)}
             {previewNote.createdAt && (
@@ -116,10 +174,22 @@ export const TaskPreview: React.FC = () => {
         </article>
       ) : (
         <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-gray-200 rounded-2xl bg-white/50">
-          <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg
+            className="w-10 h-10 text-gray-300 mb-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
-          <p className="text-gray-400 text-xs font-medium">Select a task to view details</p>
+          <p className="text-gray-400 text-xs font-medium">
+            Select a task to view details
+          </p>
         </div>
       )}
 
@@ -129,8 +199,16 @@ export const TaskPreview: React.FC = () => {
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <StatCard label="Done" value={data?.completed ?? 0} variant="green" />
-          <StatCard label="Doing" value={data?.inProgress ?? 0} variant="blue" />
-          <StatCard label="To Do" value={data?.notStarted ?? 0} variant="gray" />
+          <StatCard
+            label="Doing"
+            value={data?.inProgress ?? 0}
+            variant="blue"
+          />
+          <StatCard
+            label="To Do"
+            value={data?.notStarted ?? 0}
+            variant="gray"
+          />
         </div>
         <div className="mt-4 p-3 bg-white border border-gray-100 rounded-xl text-center text-xs font-bold text-gray-500 shadow-sm">
           TOTAL TASKS: <span className="text-blue-600">{data?.total ?? 0}</span>

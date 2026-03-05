@@ -8,6 +8,7 @@ import { useNotes } from "../utils/AsyncFunctions";
 interface NoteDetail {
   title: string;
   priority: string;
+  description?: string;
   status: string;
   dueDate: string;
   bgColor?: string;

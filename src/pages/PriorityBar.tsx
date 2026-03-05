@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getVisitorId } from "../utils/helper";
 
 export const TaskByPriority: React.FC = () => {
   const [priorityNote, setPriorityNote] = useState({
@@ -6,14 +7,24 @@ export const TaskByPriority: React.FC = () => {
     medium: 0,
     low: 0
   });
+  const visitorIdPromise = getVisitorId(); // Get visitor ID once and reuse
 
   useEffect(() => {
     const fetchNotes = async () => {
       try {
         const [highRes, mediumRes, lowRes] = await Promise.all([
-          fetch("http://localhost:8000/note/priority?priority=high", { method: "POST" }).then(res => res.json()),
-          fetch("http://localhost:8000/note/priority?priority=medium", { method: "POST" }).then(res => res.json()),
-          fetch("http://localhost:8000/note/priority?priority=low", { method: "POST" }).then(res => res.json())
+          fetch("http://localhost:8000/note/priority?priority=high", { method: "POST" , headers: {
+            "Content-Type": "application/json",
+            "visitor-id": await visitorIdPromise
+          },}).then(res => res.json()),
+          fetch("http://localhost:8000/note/priority?priority=medium", { method: "POST" , headers: {
+            "Content-Type": "application/json",
+            "visitor-id": await visitorIdPromise
+          },}).then(res => res.json()),
+          fetch("http://localhost:8000/note/priority?priority=low", { method: "POST" , headers: {
+            "Content-Type": "application/json",
+            "visitor-id": await visitorIdPromise
+          },}).then(res => res.json())
         ]);
 
         setPriorityNote({

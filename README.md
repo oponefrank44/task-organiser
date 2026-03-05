@@ -71,3 +71,71 @@ export default defineConfig([
   },
 ])
 ```
+## Getting Started
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Installation
+
+```bash
+npm install
+```
+
+### Development
+
+Start the development server with HMR:
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+### Building
+
+Build for production:
+
+```bash
+npm run build
+```
+
+### Preview
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+### Linting
+
+Run ESLint to check code quality:
+
+```bash
+npm run lint
+```
+
+## Project Structure
+
+```
+src/
+├── components/     # React components
+├── pages/          # Page components
+├── App.tsx         # Main app component
+└── main.tsx        # Entry point
+```
+
+## Features
+
+- ⚡ Vite for fast HMR and builds
+- ⚛️ React 18+ with TypeScript
+- 🎯 ESLint configuration for code quality
+- 🔧 Flexible plugin system with multiple Fast Refresh options
+
+## Resources
+
+- [Vite Documentation](https://vite.dev)
+- [React Documentation](https://react.dev)
+- [TypeScript Documentation](https://www.typescriptlang.org)

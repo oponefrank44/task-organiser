@@ -13,16 +13,23 @@ export default function Priority() {
   const { isLoading: isFetchingAll, error, data } = useFetchAllNotes();
 
   useFetchNoteById(selectedId || "");
-  const { notes, loading: reduxLoading } = useSelector((state: RootState) => state.note);
+  const { notes, loading: reduxLoading } = useSelector(
+    (state: RootState) => state.note,
+  );
+  console.log(notes);
 
   const isLoading = isFetchingAll || reduxLoading;
 
   const bgColor = (priority: string) => {
     switch (priority) {
-      case "high": return "bg-red-100 text-red-800";
-      case "medium": return "bg-yellow-100 text-yellow-800";
-      case "low": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -53,10 +60,11 @@ export default function Priority() {
        2. Changed h-screen to min-h-screen so it stretches but doesn't cut off on small phones.
     */
     <div className="w-full md:w-80 lg:w-96 flex-none bg-gray-50 border-r border-gray-200 flex flex-col min-h-screen shadow-sm">
-
       {/* Sidebar Header */}
       <div className="p-5 border-b border-gray-200 bg-white">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800">Task Manager</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+          Task Manager
+        </h2>
         <p className="text-gray-500 text-xs md:text-sm mt-1">
           Organize your day efficiently
         </p>
@@ -82,52 +90,66 @@ export default function Priority() {
           </span>
         </div>
 
-       {/* Task List Scroll Area */}
-<div className="flex-1 flex flex-col min-h-0 bg-gray-50/30">
-  <div
-    className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-3 custom-scrollbar"
-    /* This calculation ensures it fills the screen height minus the header/search space */
-    style={{ maxHeight: 'calc(100vh - 120px)' }}
-  >
-    {!notes || notes.length === 0 ? (
-      <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 shadow-sm">
-        <div className="p-3 bg-gray-50 rounded-full mb-3">
-          <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-        </div>
-        <p className="text-gray-500 font-semibold text-sm">No tasks available</p>
-        <p className="text-gray-400 text-xs mt-1">Add a new task to get started</p>
-      </div>
-    ) : (
-      (data?.notes || notes).map((task: Note) => (
-        <button
-          key={task._id}
-          onClick={() => handlePreview(task._id || "")}
-          className={`w-full text-left transition-all duration-200 transform hover:translate-x-1 active:scale-[0.98] md:active:scale-100 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-2xl bg-white shadow-sm border ${
-            selectedId === task._id
-              ? 'border-blue-500 ring-1 ring-blue-50 shadow-md'
-              : 'border-gray-100 hover:border-blue-200'
-          }`}
-        >
-          <div className="p-1">
-            <Task
-              title={task.title}
-              description={task.description}
-              priority={task.priority}
-              status={task.progress}
-              bgColor={bgColor(task.priority)}
-              dueDate={task.dueDate || ""}
-            />
-          </div>
-        </button>
-      ))
-    )}
+        {/* Task List Scroll Area */}
+        <div className="flex-1 flex flex-col min-h-0 bg-gray-50/30">
+          <div
+            className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-3 custom-scrollbar"
+            /* This calculation ensures it fills the screen height minus the header/search space */
+            style={{ maxHeight: "calc(100vh - 120px)" }}
+          >
+            {!notes || notes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 shadow-sm">
+                <div className="p-3 bg-gray-50 rounded-full mb-3">
+                  <svg
+                    className="w-8 h-8 text-gray-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                </div>
+                <p className="text-gray-500 font-semibold text-sm">
+                  No tasks available
+                </p>
+                <p className="text-gray-400 text-xs mt-1">
+                  Add a new task to get started
+                </p>
+              </div>
+            ) : (
+              (data?.notes || notes).map((task: Note) => (
+                <button
+                  key={task._id}
+                  onClick={() => handlePreview(task._id || "")}
+                  className={`w-full text-left transition-all duration-200 transform hover:translate-x-1 active:scale-[0.98] md:active:scale-100 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-2xl bg-white shadow-sm border ${
+                    selectedId === task._id
+                      ? "border-blue-500 ring-1 ring-blue-50 shadow-md"
+                      : "border-gray-100 hover:border-blue-200"
+                  }`}
+                >
+                  <div className="p-1">
+                    <Task
+                      title={task.title}
+                      description={task.description}
+                      priority={task.priority}
+                      status={task.progress}
+                      bgColor={bgColor(task.priority)}
+                      dueDate={task.dueDate || ""}
+                    />
+                  </div>
+                </button>
+              ))
+            )}
 
-    {/* Extra bottom padding for mobile browsers/home indicators */}
-    <div className="h-20 md:h-10" />
-  </div>
-</div>
+            {/* Extra bottom padding for mobile browsers/home indicators */}
+            <div className="h-20 md:h-10" />
+          </div>
+        </div>
       </div>
     </div>
   );

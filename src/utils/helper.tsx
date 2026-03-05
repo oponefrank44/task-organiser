@@ -1,3 +1,4 @@
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 type DateFormat = 'yyyy-mm-dd' | 'yy-mm-dd' | 'mm/dd/yy' | 'mm/dd/yyyy';
 
 export const convertDateTime = (
@@ -25,7 +26,14 @@ export const convertDateTime = (
   }
 };
 
-// Usage examples:
-// convertDateTime("2026-02-17T07:00:27.345Z") → "2026-02-17"
-// convertDateTime("2026-02-17T07:00:27.345Z", 'yy-mm-dd') → "26-02-17"
-// convertDateTime("2026-02-17T07:00:27.345Z", 'mm/dd/yyyy') → "02/17/2026"
+
+
+// Initialize the agent once
+const fpPromise = FingerprintJS.load();
+
+export const getVisitorId = async () => {
+  const fp = await fpPromise;
+  const result = await fp.get();
+  return result.visitorId; // This is a 32-character alphanumeric hash
+};
+
