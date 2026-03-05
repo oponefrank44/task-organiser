@@ -1,0 +1,101 @@
+import { describe, expect, test, jest, beforeEach } from "@jest/globals";
+import { NoteModel } from "src/models/notes";
+import { createNote, deleteNoteById, updateNoteById, getNoteById } from "src/controllers/note";
+import { NoteProgress, NotePriority } from "src/util/note";
+
+jest.mock("src/models/notes");
+
+describe("Note Controller Tests", () => {
+  let mockReq: any;
+  let mockRes: any;
+  let mockNext: jest.Mock;
+
+  beforeEach(() => {
+    mockReq = {
+      body: {},
+      params: {},
+      query: {},
+    };
+    mockRes = {
+      json: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+    };
+    mockNext = jest.fn();
+  });
+
+  describe("createNote", () => {
+    test("should create a note with valid request body", async () => {
+      const mockNote = {
+        _id: "1234567890",
+        title: "Test Note",
+        description: "Test Description",
+        priority: NotePriority.high,
+        progress: NoteProgress.NotStarted,
+        dueDate: new Date(),
+        save: jest.fn().mockResolvedValue(mockNote),
+      };
+
+      mockReq.body = {
+        title: "Test Note",
+        description: "Test Description",
+        priority: NotePriority.high,
+        progress: NoteProgress.NotStarted,
+        dueDate: new Date(),
+      };
+
+      (NoteModel as unknown as jest.Mock).mockReturnValue(mockNote);
+
+      await createNote(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(201);
+      expect(mockRes.json).toHaveBeenCalled();
+    });
+
+    test("should return error with missing title", async () => {
+      mockReq.body = {
+        description: "Test Description",
+      };
+
+      await createNote(mockReq, mockRes, mockNext);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+    });
+  });
+
+  describe("getNote", () => {
+    test("should fetch a note by id", async () => {
+      mockReq.params = { id: "1234567890" };
+
+      (NoteModel as unknown as jest.Mock).findById = jest.fn().mockResolvedValue({ _id: "1234567890", title: "Test" });
+
+      await getNoteById(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalled();
+    });
+  });
+
+  describe("updateNote", () => {
+    test("should update a note", async () => {
+      mockReq.params = { id: "1234567890" };
+      mockReq.body = { title: "Updated Title" };
+
+      (NoteModel as unknown as jest.Mock).findByIdAndUpdate = jest.fn().mockResolvedValue({ _id: "1234567890", title: "Updated Title" });
+
+      await updateNoteById(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalled();
+    });
+  });
+
+  describe("deleteNote", () => {
+    test("should delete a note", async () => {
+      mockReq.params = { id: "1234567890" };
+
+      (NoteModel as unknown as jest.Mock).findByIdAndDelete = jest.fn().mockResolvedValue({ _id: "1234567890" });
+
+      await deleteNoteById(mockReq, mockRes, mockNext);
+
+      expect(mockRes.json).toHaveBeenCalled();
+    });
+  });
+});
