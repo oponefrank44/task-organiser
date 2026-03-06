@@ -1,22 +1,31 @@
 import Priority from "./pages/Priority";
 import { AddTask } from "./pages/AddTask";
-import { TaskPreview } from "./pages/TaskPreview";// adjust path based on your store location
+import { TaskPreview } from "./pages/TaskPreview";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState,AppDispatch } from "./store/Store";
+import { isEditNote,resetNoteStatus } from "./note/noteSlice";
 
 
 
 
-import React, { useState } from "react";
 
 export const App: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { isEditing } = useSelector(
+    (state: RootState) => state.note,
+  );
+  const dispatch = useDispatch<AppDispatch>();
 
+
+  const handleMenuToggle = () => {
+    dispatch(isEditNote());
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       {/* MOBILE HEADER: Only shows on small screens */}
       <header className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 sticky top-0 z-50">
         <h1 className="font-bold text-blue-600"> Task Manager</h1>
         <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          onClick={handleMenuToggle}
           className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
           aria-label="Toggle Add Task"
         >
@@ -46,10 +55,10 @@ export const App: React.FC = () => {
         */}
 
         {/* Mobile Drawer Overlay */}
-        {isMenuOpen && (
+        {isEditing && (
           <div
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-            onClick={() => setIsMenuOpen(false)}
+            onClick={() => dispatch(resetNoteStatus())}
           />
         )}
 
@@ -57,11 +66,11 @@ export const App: React.FC = () => {
         <main className={`
           flex-1 p-4 lg:p-8 transition-transform duration-300 ease-in-out
           fixed inset-y-0 right-0 w-full sm:w-96 bg-white z-50 lg:static lg:z-0 lg:w-auto lg:bg-transparent
-          ${isMenuOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
+          ${isEditing ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
         `}>
           <div className="lg:hidden flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">New Task</h2>
-            <button onClick={() => setIsMenuOpen(false)} className="text-gray-500 text-2xl">&times;</button>
+            <button onClick={() => dispatch(resetNoteStatus())} className="text-gray-500 text-2xl">&times;</button>
           </div>
 
           <div className="max-w-3xl mx-auto">

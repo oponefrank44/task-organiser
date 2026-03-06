@@ -10,7 +10,7 @@ export const TaskByPriority: React.FC = () => {
     low: 0
   });
   const visitorIdPromise = getVisitorId();
-  console.log(visitorIdPromise);
+
   // Get visitor ID once and reuse
 
   useEffect(() => {
