@@ -7,9 +7,10 @@ const initialState: NoteSliceState = {
   notes: [],
   previewNote: null,
   loading: true,
-  searchNote:[],
+  searchNote: [],
   error: null,
-  isEditing: false
+  isEditing: false,
+  isMobileMenuOpen: false,
 };
 
 export const noteSlice = createSlice({
@@ -26,8 +27,8 @@ export const noteSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
-    setsearchNote: (state, action: PayloadAction<Note []>) => {
-      state.searchNote= action.payload;
+    setsearchNote: (state, action: PayloadAction<Note[]>) => {
+      state.searchNote = action.payload;
       state.loading = false;
       state.error = null;
     },
@@ -42,11 +43,18 @@ export const noteSlice = createSlice({
       state.error = null;
       state.loading = false;
       state.isEditing = true;
+      state.isMobileMenuOpen = true;
+    },
+    isOpenMobileMenu: (state) => {
+      state.error = null;
+      state.loading = false;
+      state.isMobileMenuOpen = true;
     },
     resetNoteStatus: (state) => {
       state.error = null;
       state.loading = false;
       state.isEditing = false;
+      state.isMobileMenuOpen = false;
     },
   },
 });
@@ -58,7 +66,8 @@ export const {
   setsearchNote,
   setError,
   isEditNote,
-  resetNoteStatus
+  resetNoteStatus,
+  isOpenMobileMenu
 } = noteSlice.actions;
 
 export default noteSlice.reducer;

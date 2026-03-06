@@ -15,4 +15,5 @@ export interface NoteSliceState {
   error: string | null;
   searchNote:Note[];
   isEditing:boolean;
+  isMobileMenuOpen:boolean;
 }

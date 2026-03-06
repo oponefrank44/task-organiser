@@ -2,22 +2,15 @@ import Priority from "./pages/Priority";
 import { AddTask } from "./pages/AddTask";
 import { TaskPreview } from "./pages/TaskPreview";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState,AppDispatch } from "./store/Store";
-import { isEditNote,resetNoteStatus } from "./note/noteSlice";
-
-
-
-
+import type { RootState, AppDispatch } from "./store/Store";
+import { isOpenMobileMenu, resetNoteStatus } from "./note/noteSlice";
 
 export const App: React.FC = () => {
-    const { isEditing } = useSelector(
-    (state: RootState) => state.note,
-  );
+  const { isMobileMenuOpen } = useSelector((state: RootState) => state.note);
   const dispatch = useDispatch<AppDispatch>();
 
-
   const handleMenuToggle = () => {
-    dispatch(isEditNote());
+    dispatch(isOpenMobileMenu());
   };
   return (
     <div className="min-h-screen bg-gray-50">
@@ -30,14 +23,23 @@ export const App: React.FC = () => {
           aria-label="Toggle Add Task"
         >
           {/* Hamburger Icon */}
-          <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+          <svg
+            className="w-6 h-6 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 6h16M4 12h16m-7 6h7"
+            />
           </svg>
         </button>
       </header>
 
       <div className="flex flex-col lg:flex-row min-h-[calc(100vh-64px)] lg:min-h-screen">
-
         {/* LEFT COLUMN: Priority & Preview
             On Mobile: Stacked vertically
             On Desktop: Fixed sidebar width
@@ -46,7 +48,6 @@ export const App: React.FC = () => {
           <div className="p-2 lg:p-0">
             <Priority />
           </div>
-
         </aside>
 
         {/* CENTER/MAIN AREA: AddTask
@@ -55,7 +56,7 @@ export const App: React.FC = () => {
         */}
 
         {/* Mobile Drawer Overlay */}
-        {isEditing && (
+        {isMobileMenuOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
             onClick={() => dispatch(resetNoteStatus())}
@@ -63,25 +64,31 @@ export const App: React.FC = () => {
         )}
 
         {/* AddTask Container */}
-        <main className={`
+        <main
+          className={`
           flex-1 p-4 lg:p-8 transition-transform duration-300 ease-in-out
           fixed inset-y-0 right-0 w-full sm:w-96 bg-white z-50 lg:static lg:z-0 lg:w-auto lg:bg-transparent
-          ${isEditing ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
-        `}>
+          ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
+        `}
+        >
           <div className="lg:hidden flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">New Task</h2>
-            <button onClick={() => dispatch(resetNoteStatus())} className="text-gray-500 text-2xl">&times;</button>
+            <button
+              onClick={() => dispatch(resetNoteStatus())}
+              className="text-gray-500 text-2xl"
+            >
+              &times;
+            </button>
           </div>
 
           <div className="max-w-3xl mx-auto">
             <AddTask />
           </div>
         </main>
-         <div className="border-t border-gray-100 p-2 lg:p-0">
-            {/* Requirement met: Preview shows below Priority on mobile */}
-            <TaskPreview />
-          </div>
-
+        <div className="border-t border-gray-100 p-2 lg:p-0">
+          {/* Requirement met: Preview shows below Priority on mobile */}
+          <TaskPreview />
+        </div>
       </div>
     </div>
   );
