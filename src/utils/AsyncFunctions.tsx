@@ -35,7 +35,7 @@ export const useNotes = () => {
             },
           });
           console.log(response);
-          
+
           if (!response.ok) {
             throw new Error("Failed to fetch notes");
           }
@@ -251,7 +251,7 @@ export const useNotes = () => {
   const useSearchNotesByContent = () => {
     const dispatch = useDispatch();
     // Ensure your URL is correct (e.g., http://localhost:8000/note/search)
-    const url = "http://localhost:8000/note/search";
+    const url = `${BASE_URL}/search`;
 
     return useMutation({
       mutationFn: async (searchText: string) => {
